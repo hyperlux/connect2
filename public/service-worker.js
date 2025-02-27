@@ -13,11 +13,16 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  const apiURL = 'http://localhost:5000/api';
-  if (event.request.url.startsWith(apiURL)) {
+  const apiURL = 'https://api.auroville.social';
+  
+  // Check if this is an API request
+  if (event.request.url.includes('/api/')) {
+    // Don't cache API requests, always fetch from network
     event.respondWith(fetch(event.request));
     return;
   }
+  
+  // For non-API requests, try the cache first, then network
   event.respondWith(
     caches.match(event.request).then(function(response) {
       return response || fetch(event.request);

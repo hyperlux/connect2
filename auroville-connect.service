@@ -12,17 +12,13 @@ Environment=NODE_ENV=production
 Environment=PORT=5000
 Environment=HOST=0.0.0.0
 Environment=DATABASE_URL=postgresql://postgres:postgres@localhost:5432/auroville
-Environment=JWT_SECRET=your_jwt_secret_here
-Environment=VITE_API_URL=https://api.auroville.social
-Environment=VITE_APP_URL=https://auroville.social
+Environment=JWT_SECRET=y5S6M1Fr0kFoCJTSsEQoTUYVrjskG4f8FwtDl92GbXQ=
 Environment=FRONTEND_URL=https://auroville.social
 Environment=API_URL=https://api.auroville.social
 
-# SMTP Configuration
-
 # Create uploads directory
-ExecStartPre=/bin/mkdir -p /root/AurovilleConnect/server/uploads
-ExecStartPre=/bin/chmod 755 /root/AurovilleConnect/server/uploads
+ExecStartPre=/bin/mkdir -p /var/www/html/AurovilleConnect/server/uploads
+ExecStartPre=/bin/chmod 755 /var/www/html/AurovilleConnect/server/uploads
 
 # Start the server
 ExecStart=/usr/bin/node index.js

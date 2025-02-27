@@ -12,11 +12,18 @@ import { usersRouter } from './routes/users.js';
 import winston from 'winston';
 import fs from 'fs';
 
-// Load environment variables from parent directory's .env
+// Load environment variables based on environment
 console.log('Loading environment variables...');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
+// Load environment-specific .env file if it exists, otherwise fall back to parent directory's .env
+const envFile = process.env.NODE_ENV === 'development' 
+  ? path.join(__dirname, '.env.development')
+  : path.join(__dirname, '..', '.env');
+
+console.log(`Loading environment variables from: ${envFile}`);
+dotenv.config({ path: envFile });
 
 const app = express();
 
@@ -67,27 +74,24 @@ try {
   process.exit(1);
 }
 
-// More explicit CORS configuration to ensure preflight requests work correctly
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', config.cors.origin);
-  res.header('Access-Control-Allow-Methods', config.cors.methods.join(', '));
-  res.header('Access-Control-Allow-Headers', [
-    ...config.cors.allowedHeaders,
-    'X-Custom-Header'
-  ].join(', '));
-  res.header('Access-Control-Allow-Credentials', config.cors.credentials);
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
-
 // CORS configuration
 console.log('Setting up CORS...');
-app.use(cors(config.cors));
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is allowed
+    if (config.cors.origin.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      return callback(null, false);
+    }
+  },
+  credentials: config.cors.credentials,
+  methods: config.cors.methods,
+  allowedHeaders: config.cors.allowedHeaders
+}));
 
 // Rate limiting in production
 if (process.env.NODE_ENV === 'production') {
@@ -175,7 +179,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 console.log('Starting server...');
-const server = app.listen(PORT, 'localhost', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(`
       🚀 Server is running in ${process.env.NODE_ENV || 'undefined'} mode
       🔊 Listening on 0.0.0.0:${PORT}

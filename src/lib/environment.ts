@@ -1,7 +1,7 @@
 export const environment = {
-  production: false,
-  API_URL: 'http://localhost:5000/api',
-  FRONTEND_URL: 'http://localhost:5174'
+  production: true,
+  API_URL: 'https://api.auroville.social',
+  FRONTEND_URL: 'https://auroville.social'
 };
 
 export const API_URL = environment.API_URL;
